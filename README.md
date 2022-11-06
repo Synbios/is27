@@ -81,7 +81,7 @@ Unhealthy containers will be removed from the target list and tagged for recycli
 
 [![Figure 1: Architecture of GeoServer Clutser Installation](https://geoserver-demo.s3.us-west-2.amazonaws.com/geoserver-fig1.jpg)](https://geoserver-demo.s3.us-west-2.amazonaws.com/geoserver-fig1.jpg)
 
-**DELIVERABLE URL**
+#### DELIVERABLE URL
 **The public DNS of the load balancer is:** http://demolb2-1655074011.us-west-2.elb.amazonaws.com/geoserver/index.html
 
 To verify if the EFS is installed, log in using the default username and password (**admin** and **geoserver**) and try to create a new store using GeoPackage. You should be able to install a package from **/mnt/efs_data/geodata/data_on_shared_disk.gpkg**. This file is stored in EFS.
@@ -102,3 +102,35 @@ Here are some of my assumptions. They are not required as of now but I found the
 3. **Data source**: GeoServer is claimed not to be a database but a data processor. It can both read and write to the data source. Therefore all replicas of the GeoServer cluster must write to the same data source. In order to support this feature, I did: 1) mount contains on AWS elastic file system. 2) Installed the MySQL plugin to use a shared database. (Please note that I did not install a MySQL database on the AWS VPC because I don't have a MySQL database to test and I believe the file system is more efficient and not affected by connection/pool size issues).
 
 4. **Exposed admin website**: A service like GeoServer usually should not expose its admin website to the public. It's purely for you to evaluate the site. Normally I will restrict the wicket admin site to internal IPs and add a https certificate to the load balancer and redirect all port 80 traffic to port 443.   
+
+
+### Challenges 3
+.
+> Using one of the solutions found at https://rosettacode.org/wiki/Chinese_zodiac and technology of your choice, create an automated testing solution validating the Chinese Zodiac code.
+###### What to submit (25 marks):
+- A link to a publicly accessible source control repository containing your solution (including the provided Chinese Zodiac code), documentation, and automated testing log output.
+
+##### MY ANSWER:
+
+I choose to test the program in ruby. The original program is saved as [test_target_code.rb](solution_3/test_target_code.rb). The solution file is saved as [solution.rb](solution_3/solution.rb). There is also a makefile to run the test with default parameters. To run the test:
+
+1. Make sure you have Ruby (version 2 or above) installed.
+2. Download both test_target_code.rb, solution.rb and the makefile into your current directory and run:
+```sh
+make test
+```
+Alternatively, you can run the ruby command, where **test_target_code.rb** is the target ruby file's name and **200** is the number of years to test.
+```sh
+ruby solution.rb test_target_code.rb 200
+```
+The output will show if the test is successful. Please note the test can take a long time to run if set to test for a large period of years. Here is the output for 5000 years. [test_output.txt](solution_3/test_output.txt)
+
+###### Discussion
+The test uses the class definition to wrap the test code so it can be reused. The makefile makes it relatively easy to run.
+
+Ideally, I'd like to run the test against some known data from a calendar. However, I cannot find them, so the data are generated from a known date. Another approach is to save the correct output once, so in the future, if we need to modify the code we can regenerate the data and compare it to the one we saved.
+
+Also please note that the script does not test the years before A.D. 1. This is because the 4-digit
+year is only used for years in A.D. When someone wants to calculate the result
+for the year 2000 B.C. she should input -1999 (instead of -2000), thus I assume
+B.C. years are out of the input domain, the earliest starting year is year 1.
