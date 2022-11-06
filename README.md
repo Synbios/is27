@@ -101,8 +101,18 @@ Here are some of my assumptions. They are not required as of now but I found the
 
 3. **Data source**: GeoServer is claimed not to be a database but a data processor. It can both read and write to the data source. Therefore all replicas of the GeoServer cluster must write to the same data source. In order to support this feature, I did: 1) mount contains on AWS elastic file system. 2) Installed the MySQL plugin to use a shared database. (Please note that I did not install a MySQL database on the AWS VPC because I don't have a MySQL database to test and I believe the file system is more efficient and not affected by connection/pool size issues).
 
-4. **Exposed admin website**: A service like GeoServer usually should not expose its admin website to the public. It's purely for you to evaluate the site. Normally I will restrict the wicket admin site to internal IPs and add a https certificate to the load balancer and redirect all port 80 traffic to port 443.   
+4. **Exposed admin website**: A service like GeoServer usually should not expose its admin website to the public. It's purely for you to evaluate the site. Normally I will restrict the wicket admin site to internal IPs and add a SSL certificate to the load balancer and redirect all port 80 traffic to port 443.   
 
+### Challenges 2
+.
+> During your regular workday automated alerts have notified you that one of our public-facing applications has become unreachable. As one of the Agile team members supporting this application, please describe your next steps. (Assume this application is part of a three-tier architecture with separate web, middle-tier / backend application, and database environments). 
+###### What to submit: (25 marks):
+- A PDF document containing your response.
+
+
+
+##### MY ANSWER:
+The PDF file can be found here: [solution.pdf](solution_2/solution.pdf).
 
 ### Challenges 3
 .
@@ -129,6 +139,8 @@ The output will show if the test is successful. Please note the test can take a 
 The test uses the class definition to wrap the test code so it can be reused. The makefile makes it relatively easy to run.
 
 Ideally, I'd like to run the test against some known data from a calendar. However, I cannot find them, so the data are generated from a known date. Another approach is to save the correct output once, so in the future, if we need to modify the code we can regenerate the data and compare it to the one we saved.
+
+The solution also checks for timeout. This kind of calculations should only take a small amount of time.
 
 Also please note that the script does not test the years before A.D. 1. This is because the 4-digit
 year is only used for years in A.D. When someone wants to calculate the result
