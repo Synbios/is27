@@ -1,2 +1,99 @@
-# is27
-is27 solutions
+# IS27 Application Test Solutions
+## Mike Zhou, youz@ualberta.ca
+
+
+Here is the solutions for the three challenges received on Nov 3, 2022. While the related files of the solutions are organized in three folders (i.e. solution_1, solution_2 and solution_3), I will put the answers in this file for better readibility.
+
+### Challenges 1
+.
+> GeoServer (https://geoserver.org/) is open-source software for sharing geospatial data via web services. Create an automated solution, using the technology of your choice, to perform an installation of GeoServer and all dependencies in a reproducible manner.  Some independent research may be required to support your solution approach.
+Take notes of your decisions, observations, and assumptions and include them in the submission. If you move on to the interview stage of the competition, you will be asked to deliver a short presentation describing your decisions and thought process for designing the solution.
+
+###### Required Deliverable (20 marks):
+- A link to a publicly accessible source control repository containing your attempted solution & documentation.
+- A method of verifying your solution such as installer log output (either in repo or in a reporting interface).
+###### Optional/Recommended Deliverables (30 marks):
+- Geoserver is deployed in a containerized (e.g. docker or k8s) environment.
+- A CI/CD deployment pipeline deploying containerized GeoServer to a publicly accessible (cloud or otherwise) hosted environment of your choosing.
+- A method of verifying your solutions such as login credentials for publicly available UI.
+
+##### My answer:
+
+###### 1. Docker Installation:
+My solution is to install GeoServer in a Docker container and deploy it on AWS Elastic Container Service (i.e. ECS). The Dockerfile can be find in the solution 1 folder (). Here is the instructions to build and test the docker solution:
+
+1. Install Docker (https://docs.docker.com/get-docker/). It's recommented to test this solution on Mac or Linux.
+2. Download the Dockerfile and save it to your work directory.
+```sh
+mkdir solution1
+cd solution1
+curl dillinger
+```
+3. You can now build the docker container with the **docker build** command.
+```sh
+docker build . -f Dockerfile -t test:latest
+```
+4. You can see the built image
+```
+docker image ls
+REPOSITORY          TAG       IMAGE ID       CREATED        SIZE
+test                latest    272a848cf53f   9 hours ago    727MB
+```
+5. Run the docker container on **localhost:3000**. Please note that GeoServer runs on port 8080 in the container.
+```sh
+docker run -p 3000:8080 test:latest
+```
+6. Open your browser and visit http://0.0.0.0:3000/geoserver/index.html. You should see the welcome page of the Wicket server.
+7. To verify if the REST API works (which is the main GeoServer package), you can curl the status API. It should return a valid response.
+```
+curl -u admin:geoserver -XGET http://localhost:3000/geoserver/rest/about/version.xml
+<about>
+  <resource name="GeoServer">
+    <Build-Timestamp>23-Oct-2022 05:18</Build-Timestamp>
+    <Version>2.21.2</Version>
+    <Git-Revision>ae56ccb68616bcfcc98bd21a6dd21023207bbdb8</Git-Revision>
+  </resource>
+  <resource name="GeoTools">
+    <Build-Timestamp>23-Oct-2022 04:36</Build-Timestamp>
+    <Version>27.2</Version>
+    <Git-Revision>0578a5b83add97046cb064997acf6f17d5ae331d</Git-Revision>
+  </resource>
+  <resource name="GeoWebCache">
+    <Version>1.21.2</Version>
+    <Git-Revision>1.21.x/d3c396779c7906f99347c3ca6b9bd52f2ab4063c</Git-Revision>
+  </resource>
+</about>
+```
+8. To verify if the MySQL plugin is installed: 1) login the admin panel using The default login username **admin** and password **geoserver**. 2) On the left menu click **store** then on the top of the right panel **add new store**. You should see MySQL as a store option (it will not appear if the MySQL plugin is not installed)
+
+[![MySQL plugin is installed](https://geoserver-demo.s3.us-west-2.amazonaws.com/mysql-installed.png)](https://geoserver-demo.s3.us-west-2.amazonaws.com/mysql-installed.png)
+
+Here is the docker build log file, as required.
+
+###### 2. Automated Deployment:
+The docker container is deployed in AWS Elastic Container Cluster (ECS). A CI/CD pipleline is built to automate the deployment as required. I will first discuss the architecture of the GeoServer ECS and then I will explain how to use the CI/CD pipeline.
+
+**GeoServer on AWS ECS**
+
+First, below is a figure of the overall architecture design. A Virtual Private Cloud (VPC) is created for this deployment demostration. The VPC is used to group docker container and internal file systems so they are both well organized and well protected from outside network. On the VPC, ECS manage a cluster of GeoServer containers. They are replicates of the docker image created in the previous step, and each of them is assigned to a private ip on the VPC. A load balancer (LB) is added to allow public access to the containers. The LB will evenly distribute inbound requests to all available target containers. It also check the containers for connectivity and response time. Unhealthy containers will be removed from the target list and tagged to recycle. The ECS has configurable values for the min and the max number of containers in the cluster, and a policy to change them based on the number of requests. (I set it to just 1 for this demostration but I can show you how to change them).  Other other end, the containers are mounted on a Elastic File System (EFS) to store data. The EFS is required because the docker virtual disk is not persistant and all changes will be wiped when the container stops. I set the mounting point to be **/mnt/efs_data** thus all writable data need to go there. Also, external data disk means we can host a large amount of data without worry the docker image grows too big. An alternative way for EFS is to use an external database or even S3 to store the data. It is illustrated in the figure but I did not create either of the DB or S3 bucket.
+
+[![Figure 1: Architecture of GeoServer Clutser Installation](https://geoserver-demo.s3.us-west-2.amazonaws.com/geoserver-fig1.jpg)](https://geoserver-demo.s3.us-west-2.amazonaws.com/geoserver-fig1.jpg)
+
+The public DNS of the load balancer is: http://demolb2-1655074011.us-west-2.elb.amazonaws.com/geoserver/index.html
+
+To verify if the EFS is installed, login use the default username and password (**admin** and **geoserver**) and try to create a new store using GeoPackage. You should be able to install a package from **/mnt/efs_data/geodata/data_on_shared_disk.gpkg**. This file is stored in EFS.
+
+[![EFS installed screenshot](https://geoserver-demo.s3.us-west-2.amazonaws.com/efs-installed.png)](https://geoserver-demo.s3.us-west-2.amazonaws.com/efs-installed.png)
+
+
+**CI/CD pipeline**
+For CI/CD pipeline I used AWS Codepiple (https://aws.amazon.com/codepipeline/). The pipeline file **buildspec.yml** can be found in the solution1 folder. The pipeline listens to a Codecommit repository on my AWS account (which containers only the Dockerfile and the buildspec.yml file). Once I push new commit to the master branch of the repository, the CD pipeline will be triggered and automatically build a new docker image and deploy it to the ECS platform. As there is no terminal log, I put a few screenshots in the solution1/CI_CD folder that can prove the CI/CD pipeline works. I can also give you a live demo if I move to the next round.
+
+To deploy a new version, we just need to git push change to the
+
+###### Additional information:
+Here are some of my assumptions. They are not required as for now but I found they are useful and may help you ask me more questions, if it can happen.
+1. **Dependencies**: According to GeoServer's official document (https://docs.geoserver.org/latest/en/user/). GeoServer is a compiled Java package. It is consisted of a main executable plus a number of optioan plugins that are also compiled java packages. Thus, I assume that in general GeoServer does not make system calls or calls a third part services to unless specifically requested. The only neccessary dependence thus should be java runtime environment.
+2. **scalable installation**: The chanllenge mentioned the installation needs to be both **automated** and **reproducible**. Thus I assume it expects a solution that can support a very large amount of users with ease.
+3. **Data source**: GeoServer is claimed not to be a database but a data processor. It can both read and write to the data source. Therefore all replica of the GeoServer cluster must write to the same data source. In order to support this feature, I did: 1) mount contains on AWS elastic file system. 2) Installed the MySQL plugin to use a shared database. (Please note that I did not install a MySQL database on the AWS VPC because I don't have a MySQL database to test and I believe the file system is more efficient and not affected by connection/pool size isues).
+4. **Exposed admin website**: A service like GeoServer usually should not expose it's admin website to public. It's purely for you to evaluate the site. Normally I will restrict the wicket admin site to internal ips and add a https certificate to the load balancer and redirect all port 80 tracffic to port 443.   

@@ -1,0 +1,30 @@
+Mikes-Air:geoserver wangfei$ docker build . -f Dockerfile -t test:latest
+[+] Building 169.9s (17/17) FINISHED
+ => [internal] load build definition from Dockerfile                                                                                                                                                   0.0s
+ => => transferring dockerfile: 2.90kB                                                                                                                                                                 0.0s
+ => [internal] load .dockerignore                                                                                                                                                                      0.0s
+ => => transferring context: 2B                                                                                                                                                                        0.0s
+ => [internal] load metadata for docker.io/library/ubuntu:18.04                                                                                                                                        1.1s
+ => [ 1/13] FROM docker.io/library/ubuntu:18.04@sha256:ca70a834041dd1bf16cc38dfcd24f0888ec4fa431e09f3344f354cf8d1724499                                                                                0.0s
+ => => resolve docker.io/library/ubuntu:18.04@sha256:ca70a834041dd1bf16cc38dfcd24f0888ec4fa431e09f3344f354cf8d1724499                                                                                  0.0s
+ => => sha256:ca70a834041dd1bf16cc38dfcd24f0888ec4fa431e09f3344f354cf8d1724499 1.41kB / 1.41kB                                                                                                         0.0s
+ => => sha256:cd9842111e50ca15135bd04bccfeed4e1e63006ee7d2210927fc8f49bacb4ee8 529B / 529B                                                                                                             0.0s
+ => => sha256:71eaf13299f415122ad887b4592146a6b6f5e80cd69e0cd4650102fa3a99972c 1.46kB / 1.46kB                                                                                                         0.0s
+ => [ 2/13] RUN apt-get update && apt-get upgrade -y                                                                                                                                                  20.8s
+ => [ 3/13] RUN apt-get install wget unzip curl default-jre  -y                                                                                                                                       77.7s
+ => [ 4/13] RUN mkdir -p /mnt/efs_data                                                                                                                                                                 0.3s
+ => [ 5/13] RUN mkdir -p /var/www/geoserver                                                                                                                                                            0.3s
+ => [ 6/13] WORKDIR /var/www/geoserver                                                                                                                                                                 0.0s
+ => [ 7/13] RUN wget https://geoserver-demo.s3.us-west-2.amazonaws.com/geoserver-2.21.2-bin.zip -O geoserver.zip                                                                                      61.0s
+ => [ 8/13] RUN unzip geoserver.zip                                                                                                                                                                    1.9s
+ => [ 9/13] RUN rm geoserver.zip                                                                                                                                                                       0.3s
+ => [10/13] RUN wget https://build.geoserver.org/geoserver/main/ext-latest/geoserver-2.23-SNAPSHOT-mysql-plugin.zip -O mysql_ext.zip                                                                   2.2s
+ => [11/13] RUN unzip mysql_ext.zip -d ./mysql_ext                                                                                                                                                     0.4s
+ => [12/13] RUN cp mysql_ext/*.jar webapps/geoserver/WEB-INF/lib/.                                                                                                                                     0.3s
+ => [13/13] RUN rm -rf mysql_ext mysql_ext.zip                                                                                                                                                         0.4s
+ => exporting to image                                                                                                                                                                                 2.9s
+ => => exporting layers                                                                                                                                                                                2.9s
+ => => writing image sha256:2684fd98ca3dfc19b6a3d0750eeb4a7ce3fed00af9258b4ac1a85cc9b8c7d84d                                                                                                           0.0s
+ => => naming to docker.io/library/test:latest                                                                                                                                                         0.0s
+
+Use 'docker scan' to run Snyk tests against images to find vulnerabilities and learn how to fix them
