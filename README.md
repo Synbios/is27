@@ -27,7 +27,7 @@ My solution is to install GeoServer in a Docker container and deploy it on AWS E
 ```sh
 mkdir solution1
 cd solution1
-curl dillinger
+curl https://raw.githubusercontent.com/Synbios/is27/main/solution_1/Dockerfile --output Dockerfile
 ```
 3. You can now build the docker container with the **docker build** command.
 ```sh
@@ -127,6 +127,12 @@ I choose to test the program in ruby. The original program is saved as [test_tar
 1. Make sure you have Ruby (version 2 or above) installed.
 2. Download both test_target_code.rb, solution.rb and the makefile into your current directory and run:
 ```sh
+mkdir solution3
+cd solution3
+curl https://raw.githubusercontent.com/Synbios/is27/main/solution_3/solution.rb --output solution.rb
+curl https://raw.githubusercontent.com/Synbios/is27/main/solution_3/test_target_code.rb --output test_target_code.rb
+curl https://raw.githubusercontent.com/Synbios/is27/main/solution_3/makefile --output makefile
+
 make test
 ```
 Alternatively, you can run the ruby command, where **test_target_code.rb** is the target ruby file's name and **200** is the number of years to test.
