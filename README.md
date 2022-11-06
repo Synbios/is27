@@ -90,18 +90,18 @@ To verify if the EFS is installed, log in using the default username and passwor
 
 
 **CI/CD pipeline**
-For the CI/CD pipeline I used AWS Codepiple (https://aws.amazon.com/codepipeline/). The pipeline file **buildspec.yml** can be found in the solution1 folder. The pipeline listens to a Codecommit repository on my AWS account (which contains only Dockerfile and buildspec.yml). Once I push a new commit to the **master** branch of the repository, the pipeline will be triggered and it will automatically build a new docker image and deploy it to the ECS platform. As there is no log, I put a few screenshots in the [solution_1/screenshots](solution_1/screenshots) solution_1/screenshots folder that can prove the CI/CD pipeline works. I can also give you a live demo if I move to the next round.
+For the CI/CD pipeline I used AWS Codepiple (https://aws.amazon.com/codepipeline/). The pipeline file **buildspec.yml** can be found in the solution1 folder. The pipeline listens to a Codecommit repository on my AWS account (which contains only Dockerfile and buildspec.yml). Once I push a new commit to the **master** branch of the repository, the pipeline will be triggered and it will automatically build a new docker image and deploy it to the ECS platform. As there is no log, I put a few screenshots in the [solution_1/screenshots](solution_1/screenshots) folder that can support the CI/CD pipeline works. I can also give you a live demo if I move to the next round.
 
 
 ###### Additional information:
-Here are some of my assumptions. They are not required as of now but I found they are useful and may help you ask me more questions if it can happen.
+Here are some of my assumptions for the design. They may not be required for now but I found they are useful and may help you ask me more questions later if you want.
 1. **Dependencies**: According to GeoServer's official document (https://docs.geoserver.org/latest/en/user/). GeoServer is a compiled Java package. It consists of the main executable plus a number of optional plugins that are also compiled in java packages. Thus, I assume that in general GeoServer does not make system calls or call third-party services unless specifically requested. The only necessary dependence thus should be the java runtime environment.
 
-2. **scalable installation**: The challenge mentioned the installation needs to be both **automated** and **reproducible**. Thus I assume it expects a solution that can support a very large amount of users with ease.
+2. **Scalable installation**: The challenge mentioned the installation needs to be both **automated** and **reproducible**. Thus I assume it expects a solution that need to support a very large amount of users with ease.
 
 3. **Data source**: GeoServer is claimed not to be a database but a data processor. It can both read and write to the data source. Therefore all replicas of the GeoServer cluster must write to the same data source. In order to support this feature, I did: 1) mount contains on AWS elastic file system. 2) Installed the MySQL plugin to use a shared database. (Please note that I did not install a MySQL database on the AWS VPC because I don't have a MySQL database to test and I believe the file system is more efficient and not affected by connection/pool size issues).
 
-4. **Exposed admin website**: A service like GeoServer usually should not expose its admin website to the public. It's purely for you to evaluate the site. Normally I will restrict the wicket admin site to internal IPs and add a SSL certificate to the load balancer and redirect all port 80 traffic to port 443.   
+4. **Exposed admin website**: A service like GeoServer usually should not expose its admin website to the public. It's purely for you to evaluate the site. Normally I will restrict the wicket admin site to be accessible through only internal IPs. I would also add a SSL certificate to the load balancer and redirect all port 80 traffic to port 443.   
 
 ### Challenges 2
 .
@@ -144,11 +144,8 @@ The output will show if the test is successful. Please note the test can take a 
 ###### Discussion
 The test uses the class definition to wrap the test code so it can be reused. The makefile makes it relatively easy to run.
 
-Ideally, I'd like to run the test against some known data from a calendar. However, I cannot find them, so the data are generated from a known date. Another approach is to save the correct output once, so in the future, if we need to modify the code we can regenerate the data and compare it to the one we saved.
+Ideally, I'd like to run the test against some known data from a calendar. However, I cannot find them, so the data are generated from a known date. An alternative approach is to save the correct output once. So we can regenerate the data and compare it to the one we saved if we need to modify the code in the future.
 
-The solution also checks for timeout. This kind of calculations should only take a small amount of time.
+The solution also checks for timeout. (This kind of calculations should only take a small amount of time.)
 
-Also please note that the script does not test the years before A.D. 1. This is because the 4-digit
-year is only used for years in A.D. When someone wants to calculate the result
-for the year 2000 B.C. she should input -1999 (instead of -2000), thus I assume
-B.C. years are out of the input domain, the earliest starting year is year 1.
+Also please note that the script does not test the time before A.D. 1. This is because the integer number year format is only used for time in A.D. So I assume B.C. years are out of the input domain and the earliest starting year is year 1 (because, for example, when someone wants to calculate the result for the year 2000 B.C. she should input -1999 instead of -2000). 
