@@ -20,7 +20,7 @@ Take notes of your decisions, observations, and assumptions and include them in 
 ##### MY ANSWER:
 
 ###### 1. Docker Installation:
-My solution is to install GeoServer in a Docker container and deploy it on AWS Elastic Container Service (i.e. ECS). The Dockerfile can be found in the solution 1 folder ([Dockerfile](solution_1/Dockerfile)). Here is the instructions to build and test the docker solution:
+My solution is to install GeoServer in a Docker container and deploy it on AWS Elastic Container Service (i.e. ECS). The Dockerfile can be found in the solution 1 folder ([Dockerfile](solution_1/Dockerfile)). Here are the instructions to build and test the docker solution:
 
 1. Install Docker (https://docs.docker.com/get-docker/). It's recommended to test this solution on Mac or Linux.
 2. Download the Dockerfile and save it to your work directory.
@@ -68,7 +68,7 @@ curl -u admin:geoserver -XGET http://localhost:3000/geoserver/rest/about/version
 
 [![MySQL plugin is installed](https://geoserver-demo.s3.us-west-2.amazonaws.com/mysql-installed.png)](https://geoserver-demo.s3.us-west-2.amazonaws.com/mysql-installed.png)
 
-Here is the docker build log file, as required.
+Here is the docker build log file, as required [local_docker_build.log](solution_1/local_docker_build.log)
 
 ###### 2. Automated Deployment:
 The docker container is deployed in AWS Elastic Container Cluster (ECS). A CI/CD pipeline is built to automate the deployment as required. I will first discuss the architecture of the GeoServer ECS and then I will explain how to use the CI/CD pipeline.
@@ -81,7 +81,8 @@ Unhealthy containers will be removed from the target list and tagged for recycli
 
 [![Figure 1: Architecture of GeoServer Clutser Installation](https://geoserver-demo.s3.us-west-2.amazonaws.com/geoserver-fig1.jpg)](https://geoserver-demo.s3.us-west-2.amazonaws.com/geoserver-fig1.jpg)
 
-The public DNS of the load balancer is: http://demolb2-1655074011.us-west-2.elb.amazonaws.com/geoserver/index.html
+**DELIVERABLE URL**
+**The public DNS of the load balancer is:** http://demolb2-1655074011.us-west-2.elb.amazonaws.com/geoserver/index.html
 
 To verify if the EFS is installed, log in using the default username and password (**admin** and **geoserver**) and try to create a new store using GeoPackage. You should be able to install a package from **/mnt/efs_data/geodata/data_on_shared_disk.gpkg**. This file is stored in EFS.
 
